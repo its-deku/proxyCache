@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"net/http"
+
+	httphandler "example.com/v2/proxy_cache/http_handler"
+)
 
 func main() {
-	fmt.Println("let's build a proxy cache server!!")
+	http.HandleFunc("/", httphandler.Handle)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
