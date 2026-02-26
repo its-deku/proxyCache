@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 type proxy struct {
-	URL   string
-	cache map[string]*http.Response
+	URL    string
+	muLock sync.Mutex
+	cache  map[string]*http.Response
 }
 
 func Init(port string, forwardUrl string) {
@@ -38,7 +40,9 @@ func (pry *proxy) Handle(w http.ResponseWriter, req *http.Request) {
 		io.WriteString(w, res.Header["X-Cache"][0]+"\t")
 		io.WriteString(w, res.Status)
 
-		// cache the response
+		// cache the response (add concurrency safety)
+		pry.muLock.Lock()
 		pry.cache[newUrl] = res
+		pry.muLock.Unlock()
 	}
 }
